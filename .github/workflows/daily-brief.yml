@@ -3,13 +3,13 @@ name: Tender Intelligence Daily Brief
 on:
   schedule:
     - cron: '0 6 * * *'   # ogni giorno alle 06:00 UTC
-  workflow_dispatch:        # per lanciarlo anche manualmente
+  workflow_dispatch:        # per lanciarlo anche manualmente dal tab Actions
 
 jobs:
   daily-brief:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write   # necessario per il push del brief nello step finale
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -24,8 +24,12 @@ jobs:
 
       - name: Run daily brief pipeline
         env:
+          # Il nome a sinistra è quello che daily-brief.js si aspetta (APIFY_API_TOKEN).
+          # A destra, secrets.APIFY_TOKEN presuppone che tu abbia chiamato così il
+          # secret in Settings → Secrets and variables → Actions. Se lo hai chiamato
+          # diversamente, aggiorna qui il nome dopo "secrets.".
+          APIFY_API_TOKEN: ${{ secrets.APIFY_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
         run: node daily-brief.js
 
       - name: Commit and push brief
